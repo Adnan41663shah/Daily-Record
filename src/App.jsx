@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Calculator, FileSpreadsheet, Edit2, Info, LogOut, Copy, Upload, Shield, BarChart2, X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Trash2, Calculator, FileSpreadsheet, Edit2, Info, LogOut, Copy, Upload, Shield, BarChart2, X, CheckCircle2, Eye, EyeOff, Download, ArrowUp, ArrowDown } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { DndContext, closestCenter, KeyboardSensor, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, horizontalListSortingStrategy, sortableKeyboardCoordinates, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -47,24 +52,25 @@ const createNewSheet = (name) => {
   };
 };
 
-// Auth Helpers
-const SESSION_DAYS = 15;
-const getSession = () => {
+// ----------------------------------------------------------------------
+// DATA MIGRATION HELPER
+// ----------------------------------------------------------------------
+const getActiveDataKey = () => {
   try {
-    const session = JSON.parse(localStorage.getItem('tiffin_session'));
-    if (session && session.expiresAt > Date.now()) {
-      return session.name;
+    const sessionStr = localStorage.getItem('tiffin_session');
+    if (sessionStr) {
+      const session = JSON.parse(sessionStr);
+      if (session.name) return `tiffinTrackerData_${session.name}`;
     }
-    return null;
-  } catch (e) { return null; }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('tiffinTrackerData_')) {
+        return key;
+      }
+    }
+  } catch (e) {}
+  return 'tiffinTrackerData_local';
 };
-const setSession = (name) => {
-  localStorage.setItem('tiffin_session', JSON.stringify({
-    name,
-    expiresAt: Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000
-  }));
-};
-const clearSession = () => localStorage.removeItem('tiffin_session');
 
 // ----------------------------------------------------------------------
 // DATE FORMATTER & COMPONENT
@@ -104,146 +110,45 @@ function CustomDateInput({ value, onChange }) {
 }
 
 // ----------------------------------------------------------------------
-// LOGIN SCREEN
+// SORTABLE TAB COMPONENT
 // ----------------------------------------------------------------------
-function LoginScreen({ onLogin }) {
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [isImportMode, setIsImportMode] = useState(false);
-  const [importCode, setImportCode] = useState('');
+function SortableSheetTab({ sheet, activeSheetId, editingSheetId, editSheetName, setEditSheetName, saveSheetName, startEditingSheet, setActiveSheetId }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: sheet.id });
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (isImportMode) {
-      try {
-        const decoded = JSON.parse(atob(importCode));
-        if (!decoded.name || !decoded.password || !decoded.data) throw new Error();
-        
-        const safeName = decoded.name;
-        localStorage.setItem(`tiffin_auth_${safeName}`, JSON.stringify({ password: decoded.password }));
-        localStorage.setItem(`tiffinTrackerData_${safeName}`, JSON.stringify(decoded.data));
-        
-        onLogin(safeName);
-      } catch (e) {
-        setError("Invalid sync code. Please check and try again.");
-      }
-      return;
-    }
-
-    if (!name.trim() || !password.trim()) {
-      setError("Please enter both name and password.");
-      return;
-    }
-    const safeName = name.trim().toLowerCase();
-    const authKey = `tiffin_auth_${safeName}`;
-    const storedAuth = localStorage.getItem(authKey);
-    
-    if (storedAuth) {
-      const parsedAuth = JSON.parse(storedAuth);
-      if (parsedAuth.password !== password) {
-        setError("Incorrect password for this name.");
-        return;
-      }
-    } else {
-      // Register new user locally
-      localStorage.setItem(authKey, JSON.stringify({ password }));
-    }
-    onLogin(safeName);
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
   };
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center p-4 selection:bg-zinc-200 selection:text-zinc-900 relative overflow-hidden">
-      {/* Decorative background blur */}
-      <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-
-      <div className="max-w-md w-full bg-white/80 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-200/60 overflow-hidden relative z-10">
-        <div className="p-8 pb-4 text-center">
-          <div className="w-14 h-14 bg-zinc-900 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-lg shadow-zinc-900/20">
-            <Shield className="text-white" size={26} />
-          </div>
-          <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Welcome to Tiffin Tracker</h2>
-          <p className="text-zinc-500 mt-2 text-sm font-medium">Secure local access for your daily records</p>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners} className={cn(
+      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 border cursor-grab active:cursor-grabbing",
+      activeSheetId === sheet.id 
+        ? "bg-white border-slate-200/80 text-zinc-900 shadow-sm" 
+        : "bg-transparent border-transparent text-zinc-500 hover:bg-black/[0.03] hover:text-zinc-800"
+    )}>
+      {editingSheetId === sheet.id ? (
+        <div className="flex items-center gap-1" onPointerDown={e => e.stopPropagation()}>
+          <input 
+            autoFocus
+            type="text"
+            className="bg-white border border-zinc-300 rounded px-2 py-0.5 w-24 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-500 text-zinc-900"
+            value={editSheetName}
+            onChange={(e) => setEditSheetName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && saveSheetName(sheet.id)}
+            onBlur={() => saveSheetName(sheet.id)}
+          />
         </div>
-
-        <form onSubmit={handleLogin} className="p-8 pt-4 space-y-5">
-          {error && (
-            <div className="p-3 bg-red-50/80 text-red-600 text-sm font-medium rounded-xl border border-red-100 flex items-center gap-2">
-               <span className="w-1.5 h-1.5 rounded-full bg-red-500 block"></span>
-              {error}
-            </div>
-          )}
-
-          {!isImportMode ? (
-            <>
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold tracking-wide text-zinc-600 uppercase">Your Name</label>
-                <input 
-                  type="text" 
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-white border border-slate-200/80 rounded-xl focus:ring-4 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none text-zinc-900 font-medium placeholder-zinc-400"
-                  placeholder="e.g. John Doe"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="block text-xs font-semibold tracking-wide text-zinc-600 uppercase">Password</label>
-                <div className="relative">
-                  <input 
-                    type={showPassword ? "text" : "password"} 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3.5 bg-white border border-slate-200/80 rounded-xl focus:ring-4 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none text-zinc-900 font-medium placeholder-zinc-400"
-                    placeholder="••••••••"
-                  />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowPassword(!showPassword)} 
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 rounded-md transition-colors focus:outline-none"
-                    title={showPassword ? "Hide Password" : "Show Password"}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-              </div>
-              <p className="text-[11px] text-zinc-500 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <strong className="text-zinc-700 font-semibold">Note:</strong> Data is stored locally on this device. To access data elsewhere, use the "Sync" feature inside.
-              </p>
-            </>
-          ) : (
-            <div className="space-y-1">
-              <label className="block text-xs font-semibold tracking-wide text-zinc-600 uppercase">Paste Sync Code</label>
-              <textarea 
-                value={importCode}
-                onChange={(e) => setImportCode(e.target.value)}
-                className="w-full px-4 py-3.5 bg-white border border-slate-200/80 rounded-xl focus:ring-4 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none h-32 resize-none font-mono text-xs text-zinc-800 placeholder-zinc-400"
-                placeholder="Paste the code copied from your other device here..."
-              />
-            </div>
-          )}
-
-          <button 
-            type="submit"
-            className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-semibold py-3.5 px-4 rounded-xl transition-all shadow-md shadow-zinc-900/10 hover:shadow-lg active:scale-[0.98] flex justify-center items-center gap-2"
-          >
-            {isImportMode ? "Import & Login" : "Continue"}
-          </button>
-
-          <div className="text-center pt-2">
-            <button 
-              type="button" 
-              onClick={() => { setIsImportMode(!isImportMode); setError(''); }}
-              className="text-xs text-zinc-500 font-semibold hover:text-zinc-900 transition-colors"
-            >
-              {isImportMode ? "Back to Login" : "Import data from another device?"}
+      ) : (
+        <div className="flex items-center gap-2" onClick={() => setActiveSheetId(sheet.id)}>
+          <span>{sheet.name}</span>
+          {activeSheetId === sheet.id && (
+            <button onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); startEditingSheet(sheet.id, sheet.name); }} className="text-zinc-400 hover:text-zinc-900 p-0.5 rounded transition-colors" title="Edit Sheet Name">
+              <Edit2 size={13} />
             </button>
-          </div>
-        </form>
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -251,8 +156,8 @@ function LoginScreen({ onLogin }) {
 // ----------------------------------------------------------------------
 // DASHBOARD
 // ----------------------------------------------------------------------
-function Dashboard({ user, onLogout }) {
-  const dataKey = `tiffinTrackerData_${user}`;
+function Dashboard() {
+  const dataKey = getActiveDataKey();
 
   // Load data from localStorage or initialize with one sheet
   const [sheets, setSheets] = useState(() => {
@@ -273,7 +178,38 @@ function Dashboard({ user, onLogout }) {
   const [editSheetName, setEditSheetName] = useState('');
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [showMonthSelect, setShowMonthSelect] = useState(false);
-  const [showNavbarPassword, setShowNavbarPassword] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(MouseSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+    if (active && over && active.id !== over.id) {
+      setSheets((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+        const newItems = [...items];
+        const [movedItem] = newItems.splice(oldIndex, 1);
+        newItems.splice(newIndex, 0, movedItem);
+        return newItems;
+      });
+    }
+  };
 
   // Persist data to localStorage whenever sheets change
   useEffect(() => {
@@ -290,10 +226,30 @@ function Dashboard({ user, onLogout }) {
 
   // --- Sync / Export feature ---
   const handleExportSync = () => {
-    const auth = JSON.parse(localStorage.getItem(`tiffin_auth_${user}`));
-    const payload = btoa(JSON.stringify({ name: user, password: auth.password, data: sheets }));
+    const payload = btoa(JSON.stringify({ data: sheets }));
     navigator.clipboard.writeText(payload);
-    alert("Sync code copied to clipboard! \n\nTo use on another device:\n1. Open this app on the new device.\n2. Click 'Import data from another device' on the login screen.\n3. Paste the code.");
+    alert("Sync code copied to clipboard! \n\nTo use on another device:\n1. Open this app on the new device.\n2. Click 'Import' in the top right menu.\n3. Paste the code.");
+  };
+
+  const handleImportData = (code) => {
+    try {
+      const decodedStr = atob(code);
+      let parsed = JSON.parse(decodedStr);
+      let sheetsToImport = [];
+      if (parsed.data) {
+        sheetsToImport = parsed.data;
+      } else if (Array.isArray(parsed)) {
+        sheetsToImport = parsed;
+      } else {
+        throw new Error("Invalid format");
+      }
+      setSheets(sheetsToImport);
+      if (sheetsToImport.length > 0) setActiveSheetId(sheetsToImport[0].id);
+      setShowImportModal(false);
+      alert("Data imported successfully!");
+    } catch (e) {
+      alert("Invalid sync code. Please check and try again.");
+    }
   };
 
   // --- Sheet Actions ---
@@ -362,6 +318,22 @@ function Dashboard({ user, onLogout }) {
     updateActiveSheet({ records: newRecords });
   };
 
+  const insertRecordAbove = (recordId) => {
+    const index = activeSheet.records.findIndex(r => r.id === recordId);
+    if (index === -1) return;
+    const newRecords = [...activeSheet.records];
+    newRecords.splice(index, 0, { id: generateId(), date: '', morning: '', night: '', notes: '' });
+    updateActiveSheet({ records: newRecords });
+  };
+
+  const insertRecordBelow = (recordId) => {
+    const index = activeSheet.records.findIndex(r => r.id === recordId);
+    if (index === -1) return;
+    const newRecords = [...activeSheet.records];
+    newRecords.splice(index + 1, 0, { id: generateId(), date: '', morning: '', night: '', notes: '' });
+    updateActiveSheet({ records: newRecords });
+  };
+
   // --- Calculations & Formatting ---
   const getDayOfWeek = (dateString) => {
     if (!dateString) return '';
@@ -395,6 +367,67 @@ function Dashboard({ user, onLogout }) {
     setCalculatedTotal(totalTiffins * priceNum);
   };
 
+  // --- Export PDF ---
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.setFontSize(18);
+    doc.text(`Tiffin Record: ${activeSheet.name}`, 14, 22);
+    
+    // Add date of generation
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    // Setup table data
+    const tableColumn = ["Date", "Day", "Morning", "Night", "Notes"];
+    const tableRows = [];
+    
+    activeSheet.records.forEach(record => {
+      const recordData = [
+        formatDateToDDMMYY(record.date) || '-',
+        getDayOfWeek(record.date) || '-',
+        record.morning || '-',
+        record.night || '-',
+        record.notes || '-'
+      ];
+      tableRows.push(recordData);
+    });
+    
+    // Generate table
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 35,
+      theme: 'grid',
+      headStyles: { fillColor: [24, 24, 27] }, // zinc-900
+      alternateRowStyles: { fillColor: [250, 250, 250] }, // neutral-50
+      margin: { top: 35 },
+    });
+    
+    const finalY = doc.lastAutoTable.finalY || 35;
+    
+    // Add Summary
+    doc.setFontSize(12);
+    doc.setTextColor(0);
+    doc.text("Summary", 14, finalY + 15);
+    
+    doc.setFontSize(10);
+    doc.text(`Total Morning Tiffins: ${totalMorning}`, 14, finalY + 23);
+    doc.text(`Total Night Tiffins: ${totalNight}`, 14, finalY + 29);
+    doc.text(`Total Tiffins: ${totalTiffins}`, 14, finalY + 35);
+    
+    if (activeSheet.price) {
+      doc.text(`Price per Tiffin: Rs. ${activeSheet.price}`, 14, finalY + 41);
+      const totalAmt = totalTiffins * parseFloat(activeSheet.price);
+      doc.setFont(undefined, 'bold');
+      doc.text(`Total Payable Amount: Rs. ${totalAmt.toLocaleString('en-IN')}`, 14, finalY + 49);
+    }
+    
+    doc.save(`Tiffin_Record_${activeSheet.name.replace(/\s+/g, '_')}.pdf`);
+  };
+
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-800 font-sans selection:bg-zinc-200 selection:text-zinc-900">
       
@@ -403,25 +436,25 @@ function Dashboard({ user, onLogout }) {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between py-3 sm:h-16 gap-3 sm:gap-0">
             <div className="flex items-center justify-between w-full sm:w-auto">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-zinc-900 rounded-lg flex items-center justify-center text-white shrink-0 shadow-sm shadow-zinc-900/20">
                   <FileSpreadsheet size={16} />
                 </div>
-                <h1 className="text-lg font-bold text-zinc-900 tracking-tight">
+                <h1 className="text-sm sm:text-2xl font-bold text-zinc-900 tracking-tight">
                   Tiffin Tracker
                 </h1>
               </div>
               
               {/* Mobile Right Icons */}
               <div className="flex items-center gap-1 sm:hidden">
-                <button onClick={() => setIsReportOpen(true)} className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors" title="View Report">
+                <button onClick={() => setIsReportOpen(true)} className="p-1.5 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors" title="View Report">
                   <BarChart2 size={18} />
                 </button>
-                <button onClick={handleExportSync} className="p-2 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors" title="Copy Sync Code">
-                  <Copy size={18} />
+                <button onClick={() => setShowImportModal(true)} className="p-1.5 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors" title="Import Data">
+                  <Upload size={18} />
                 </button>
-                <button onClick={onLogout} className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
-                  <LogOut size={18} />
+                <button onClick={handleExportSync} className="p-1.5 text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors" title="Copy Sync Code">
+                  <Copy size={18} />
                 </button>
               </div>
             </div>
@@ -432,62 +465,36 @@ function Dashboard({ user, onLogout }) {
                 <BarChart2 size={15} />
                 <span className="hidden md:inline">Report</span>
               </button>
+              <button className="flex items-center gap-2 px-3 py-1.5 bg-white text-zinc-700 rounded-lg text-sm font-semibold border border-slate-200/80 shadow-sm hover:bg-zinc-50 hover:border-slate-300 transition-all active:scale-95" onClick={() => setShowImportModal(true)} title="Import data from another device">
+                <Upload size={15} />
+                <span className="hidden md:inline">Import</span>
+              </button>
               <button className="flex items-center gap-2 px-3 py-1.5 bg-white text-zinc-700 rounded-lg text-sm font-semibold border border-slate-200/80 shadow-sm hover:bg-zinc-50 hover:border-slate-300 transition-all active:scale-95" onClick={handleExportSync} title="Click to copy cross-device sync code">
                 <Copy size={15} />
                 <span className="hidden md:inline">Sync</span>
               </button>
-              <div className="h-5 w-px bg-slate-200/80 mx-1"></div>
-              <div className="flex items-center gap-3">
-                <div 
-                  className="flex flex-col items-end cursor-pointer select-none group"
-                  onClick={() => setShowNavbarPassword(!showNavbarPassword)}
-                  title="Click to reveal password"
-                >
-                  <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold group-hover:text-zinc-600 transition-colors">Account</span>
-                  <span className="text-sm font-semibold text-zinc-900 capitalize leading-none mt-0.5 group-hover:text-zinc-700 transition-colors">
-                    {showNavbarPassword ? JSON.parse(localStorage.getItem(`tiffin_auth_${user}`))?.password : user}
-                  </span>
-                </div>
-                <button onClick={onLogout} className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
-                  <LogOut size={18} />
-                </button>
-              </div>
             </div>
           </div>
           
           {/* Sheet Tabs - Scrollable horizontally on mobile */}
           <div className="flex overflow-x-auto hide-scrollbar gap-1.5 items-center py-2 sm:py-3 border-t border-slate-100 sm:border-0 sm:mt-0">
-            {sheets.map(sheet => (
-              <div key={sheet.id} className={cn(
-                "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 border",
-                activeSheetId === sheet.id 
-                  ? "bg-white border-slate-200/80 text-zinc-900 shadow-sm" 
-                  : "bg-transparent border-transparent text-zinc-500 hover:bg-black/[0.03] hover:text-zinc-800 cursor-pointer"
-              )}>
-                {editingSheetId === sheet.id ? (
-                  <div className="flex items-center gap-1">
-                    <input 
-                      autoFocus
-                      type="text"
-                      className="bg-white border border-zinc-300 rounded px-2 py-0.5 w-24 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-500 text-zinc-900"
-                      value={editSheetName}
-                      onChange={(e) => setEditSheetName(e.target.value)}
-                      onKeyDown={(e) => e.key === 'Enter' && saveSheetName(sheet.id)}
-                      onBlur={() => saveSheetName(sheet.id)}
-                    />
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2" onClick={() => setActiveSheetId(sheet.id)}>
-                    <span>{sheet.name}</span>
-                    {activeSheetId === sheet.id && (
-                      <button onClick={(e) => { e.stopPropagation(); startEditingSheet(sheet.id, sheet.name); }} className="text-zinc-400 hover:text-zinc-900 p-0.5 rounded transition-colors">
-                        <Edit2 size={13} />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            ))}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+              <SortableContext items={sheets.map(s => s.id)} strategy={horizontalListSortingStrategy}>
+                {sheets.map(sheet => (
+                  <SortableSheetTab 
+                    key={sheet.id}
+                    sheet={sheet}
+                    activeSheetId={activeSheetId}
+                    editingSheetId={editingSheetId}
+                    editSheetName={editSheetName}
+                    setEditSheetName={setEditSheetName}
+                    saveSheetName={saveSheetName}
+                    startEditingSheet={startEditingSheet}
+                    setActiveSheetId={setActiveSheetId}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
             <button onClick={() => setShowMonthSelect(true)} className="flex items-center justify-center w-7 h-7 rounded-lg bg-white text-zinc-600 hover:bg-zinc-50 transition-all shrink-0 border border-slate-200/80 shadow-sm ml-1" title="Add Sheet">
               <Plus size={16} />
             </button>
@@ -504,13 +511,22 @@ function Dashboard({ user, onLogout }) {
             <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">{activeSheet.name}</h2>
             <p className="text-sm text-zinc-500 mt-1 font-medium">Manage your daily tiffin records.</p>
           </div>
-          <button 
-            onClick={() => handleDeleteSheet(activeSheetId)}
-            className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-[13px] font-semibold text-red-600 bg-transparent hover:bg-red-50 rounded-lg transition-colors self-start sm:self-auto group"
-          >
-            <Trash2 size={14} className="opacity-70 group-hover:opacity-100" />
-            Delete Sheet
-          </button>
+          <div className="flex gap-2 self-start sm:self-auto">
+            <button 
+              onClick={handleExportPDF}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-[13px] font-semibold text-zinc-700 bg-white border border-slate-200/80 hover:bg-zinc-50 hover:border-slate-300 rounded-lg transition-colors shadow-sm active:scale-95 group"
+            >
+              <Download size={14} className="opacity-70 group-hover:opacity-100" />
+              Export PDF
+            </button>
+            <button 
+              onClick={() => handleDeleteSheet(activeSheetId)}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 text-[13px] font-semibold text-red-600 bg-transparent hover:bg-red-50 border-1  rounded-lg transition-colors group"
+            >
+              <Trash2 size={14} className="opacity-70 group-hover:opacity-100" />
+              Delete Sheet
+            </button>
+          </div>
         </div>
 
         {/* Data Table Card */}
@@ -582,13 +598,30 @@ function Dashboard({ user, onLogout }) {
                       />
                     </td>
                     <td className="py-1 sm:py-2 px-2 sm:px-4 text-center">
-                      <button 
-                        onClick={() => deleteRecord(record.id)}
-                        className="p-1.5 sm:p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all opacity-100 sm:opacity-0 group-hover:opacity-100 focus:opacity-100 sm:scale-90 group-hover:scale-100 mx-auto"
-                        title="Delete row"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div className="flex items-center justify-center gap-0.5 sm:gap-1.5 opacity-100 sm:opacity-50 group-hover:opacity-100 transition-opacity">
+                        <button 
+                          onClick={() => insertRecordAbove(record.id)}
+                          className="p-1 sm:p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors active:scale-95"
+                          title="Insert row above"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button 
+                          onClick={() => insertRecordBelow(record.id)}
+                          className="p-1 sm:p-1.5 text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 rounded-lg transition-colors active:scale-95"
+                          title="Insert row below"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                        <div className="w-px h-4 bg-slate-200 mx-0.5 hidden sm:block"></div>
+                        <button 
+                          onClick={() => deleteRecord(record.id)}
+                          className="p-1 sm:p-1.5 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors active:scale-95"
+                          title="Delete row"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -600,10 +633,10 @@ function Dashboard({ user, onLogout }) {
                   </td>
                   <td className="border-r border-slate-100/60 p-0" colSpan={2}>
                      <div className="flex h-full items-stretch">
-                        <div className="flex-1 py-2 sm:py-3 text-center text-zinc-900 bg-white border-r border-slate-100/60 text-base sm:text-lg">
+                        <div className="flex-1 py-2 sm:py-3 text-center text-zinc-900 bg-zinc-50 border-r border-slate-100/60 text-base sm:text-lg">
                           {totalMorning}
                         </div>
-                        <div className="flex-1 py-2 sm:py-3 text-center text-zinc-900 bg-white text-base sm:text-lg">
+                        <div className="flex-1 py-2 sm:py-3 text-center text-zinc-900 bg-zinc-50 border-r border-slate-100/60 text-base sm:text-lg">
                           {totalNight}
                         </div>
                      </div>
@@ -675,6 +708,7 @@ function Dashboard({ user, onLogout }) {
       
       {isReportOpen && <ReportModal sheets={sheets} onClose={() => setIsReportOpen(false)} />}
       {showMonthSelect && <MonthSelectModal onClose={() => setShowMonthSelect(false)} onSelect={handleAddSheet} />}
+      {showImportModal && <ImportModal onClose={() => setShowImportModal(false)} onImport={handleImportData} />}
     </div>
   );
 }
@@ -711,6 +745,60 @@ function ReportModal({ sheets, onClose }) {
   const grandTotalTiffins = grandMorning + grandNight;
   const grandTotalAmount = reportData.reduce((sum, row) => sum + row.amount, 0);
 
+  const handleExportReportPDF = () => {
+    const doc = new jsPDF();
+    
+    doc.setFontSize(18);
+    doc.text(`Comprehensive Tiffin Report`, 14, 22);
+    
+    doc.setFontSize(10);
+    doc.setTextColor(100);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+    
+    const tableColumn = ["Sheet Name", "Morning", "Night", "Total", "Price/Unit", "Amount"];
+    const tableRows = [];
+    
+    reportData.forEach(row => {
+      tableRows.push([
+        row.name,
+        row.morning,
+        row.night,
+        row.total,
+        `Rs. ${row.price}`,
+        `Rs. ${row.amount.toLocaleString('en-IN')}`
+      ]);
+    });
+    
+    // Add Grand Total row
+    tableRows.push([
+      'GRAND TOTAL',
+      grandMorning,
+      grandNight,
+      grandTotalTiffins,
+      '-',
+      `Rs. ${grandTotalAmount.toLocaleString('en-IN')}`
+    ]);
+    
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 35,
+      theme: 'grid',
+      headStyles: { fillColor: [24, 24, 27] },
+      alternateRowStyles: { fillColor: [250, 250, 250] },
+      margin: { top: 35 },
+      didParseCell: function(data) {
+        // Highlight last row
+        if (data.row.index === tableRows.length - 1) {
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.fillColor = [228, 228, 231]; // zinc-200
+        }
+      }
+    });
+    
+    doc.save(`Tiffin_Comprehensive_Report.pdf`);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col border border-white/20">
@@ -721,13 +809,25 @@ function ReportModal({ sheets, onClose }) {
               <BarChart2 size={22} />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Comprehensive Report</h2>
-              <p className="text-[13px] text-zinc-500 font-medium mt-0.5">All sheets summary and calculations</p>
+              <h2 className="text-sm sm:text-xl font-bold text-zinc-900 tracking-tight">Comprehensive Report</h2>
+              <p className="text-xs sm:text-[13px] text-zinc-500 font-medium mt-0.5">All sheets summary and calculations</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors">
-            <X size={22} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button 
+              onClick={handleExportReportPDF}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 text-white rounded-lg text-sm font-semibold hover:bg-zinc-800 transition-colors shadow-sm active:scale-95"
+            >
+              <Download size={14} />
+              Export PDF
+            </button>
+            <button onClick={handleExportReportPDF} className="sm:hidden p-2 text-zinc-600 bg-zinc-100 hover:bg-zinc-200 rounded-xl transition-colors shadow-sm" title="Export PDF">
+              <Download size={18} />
+            </button>
+            <button onClick={onClose} className="p-2 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 rounded-xl transition-colors">
+              <X size={22} />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -844,13 +944,43 @@ function MonthSelectModal({ onClose, onSelect }) {
   );
 }
 
+// ----------------------------------------------------------------------
+// IMPORT MODAL
+// ----------------------------------------------------------------------
+function ImportModal({ onClose, onImport }) {
+  const [code, setCode] = useState('');
+
+  const handleImport = () => {
+    if (!code.trim()) return;
+    onImport(code.trim());
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] p-8 w-full max-w-sm border border-white/20">
+        <h3 className="text-xl font-bold text-zinc-900 tracking-tight mb-1.5">Import Data</h3>
+        <p className="text-[13px] text-zinc-500 font-medium mb-6">Paste the sync code copied from your other device.</p>
+        
+        <div className="mb-8">
+          <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-widest mb-2">Sync Code</label>
+          <textarea 
+            value={code} 
+            onChange={e => setCode(e.target.value)} 
+            className="w-full p-3.5 bg-white border border-slate-200/80 rounded-xl focus:ring-4 focus:ring-zinc-900/5 focus:border-zinc-500 outline-none text-zinc-900 font-mono text-xs transition-all shadow-sm h-32 resize-none"
+            placeholder="Paste code here..."
+          />
+        </div>
+        
+        <div className="flex justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2.5 text-zinc-600 bg-white border border-slate-200/80 hover:bg-zinc-50 hover:border-slate-300 rounded-xl font-semibold transition-all shadow-sm">Cancel</button>
+          <button onClick={handleImport} className="px-5 py-2.5 text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl font-semibold transition-all shadow-md shadow-zinc-900/20 active:scale-95">Import Data</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Main App export wrappers
 export default function App() {
-  const [user, setUser] = useState(getSession());
-
-  if (!user) {
-    return <LoginScreen onLogin={(name) => { setSession(name); setUser(name); }} />;
-  }
-
-  return <Dashboard user={user} onLogout={() => { clearSession(); setUser(null); }} />;
+  return <Dashboard />;
 }
