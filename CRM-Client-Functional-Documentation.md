@@ -1,3 +1,430 @@
+# EMS CloudBlitz CRM - User SOP Manual
+
+## 1) Purpose of This SOP
+
+This document is for operational users and managers.
+
+It explains:
+- How each role should use the CRM daily
+- What each screen means
+- What each main button does
+- How every workflow moves from one stage to another
+- Why the system behaves the way it does in each process
+
+This is a business-operations guide, not a technical guide.
+
+---
+
+## 2) Who Uses This CRM
+
+There are 3 operational roles:
+- Admin
+- Presales
+- Sales
+
+Each role sees different pages and actions based on responsibility.
+
+---
+
+## 3) Core CRM Logic (Simple View)
+
+Every inquiry (lead) follows this operating cycle:
+
+1. Lead is created (manual entry or website form).
+2. Lead is handled by Presales for first communication and qualification.
+3. Follow-ups are scheduled and tracked until next action is due.
+4. Qualified lead is forwarded to Sales.
+5. Sales drives conversion/admission outcome.
+6. Dashboards and reports update automatically from these actions.
+
+Important logic:
+- One lead should always have clear ownership.
+- Follow-up discipline is mandatory to avoid lead leakage.
+- Status updates are used for team tracking and performance review.
+
+---
+
+## 4) Role-Wise SOP
+
+## 4.1 Admin SOP
+
+### Daily objectives
+- Monitor team activity and performance
+- Ensure clean process handovers between Presales and Sales
+- Manage users and permissions
+- Maintain dropdown/master values used in operations
+- Review reports and intervene where required
+
+### Typical daily sequence
+1. Open Dashboard and review overall pipeline.
+2. Check unattended/new counts and delayed follow-up areas.
+3. Review Presales and Sales performance sections.
+4. Open user screens and verify active team members.
+5. Review options/master values if process updates are required.
+6. Check reports for manager-level decisions.
+
+### Admin workflow decisions
+- If a team member is inactive or leaves, disable user immediately.
+- If lead distribution is uneven, use reassignment options.
+- If process categories change (course/location/stage), update options.
+- If quality issues appear, review inquiry activities and call history.
+
+---
+
+## 4.2 Presales SOP
+
+### Daily objectives
+- Capture and qualify incoming leads
+- Maintain complete communication notes
+- Keep follow-up queue clean and on-time
+- Forward only qualified leads to Sales with proper context
+
+### Typical daily sequence
+1. Open Inquiry list and check new/unattended leads.
+2. Open each lead, validate details, and start first contact.
+3. Add message/note after each interaction.
+4. Add follow-up with next date/time and expected outcome.
+5. Continue updates until lead is ready for Sales.
+6. Use “Forward to Sales” when qualification is complete.
+
+### Presales workflow decisions
+- Do not leave leads without next follow-up date.
+- Update notes on every call or WhatsApp touchpoint.
+- Forward only when enough clarity is available for Sales action.
+
+---
+
+## 4.3 Sales SOP
+
+### Daily objectives
+- Work assigned or claimed leads
+- Execute stage-wise counseling and closure
+- Mark conversion/admission outcomes correctly
+- Keep follow-up and stage progress current
+
+### Typical daily sequence
+1. Open assigned/sales inquiry views.
+2. Claim or take ownership of available leads.
+3. Review full lead history from Presales notes and activity.
+4. Conduct follow-ups and update stage/sub-stage.
+5. Update conversion/admission status when milestone is reached.
+6. Keep pending leads with clear next actions.
+
+### Sales workflow decisions
+- Use clear stage progression for pipeline accuracy.
+- Never close a lead without meaningful outcome notes.
+- Keep admission and conversion statuses updated immediately.
+
+---
+
+## 5) Dashboard SOP and Meaning
+
+Dashboards are live operational control panels. Numbers are not just statistics; they represent action queues.
+
+## 5.1 Main Dashboard (All logged-in roles)
+
+What to use it for:
+- Quick health check of current workload
+- Detect pending follow-up pressure
+- Detect new inquiry spikes
+
+How to read it:
+- Higher pending follow-ups = future conversion risk if not addressed
+- High unattended/new count = response delay risk
+- Trend movement helps supervisors decide team load balancing
+
+## 5.2 Presales Dashboard
+
+Focus areas:
+- New leads needing first contact
+- Follow-up completion discipline
+- Handover readiness to Sales
+
+Logic:
+- Presales performance is measured by contact speed, qualification quality, and clean forwarding.
+
+## 5.3 Sales Dashboard
+
+Focus areas:
+- Active sales-stage leads
+- Follow-up completion and stage progression
+- Conversion/admission outcomes
+
+Logic:
+- Sales performance is measured by progression quality and closure outcomes.
+
+## 5.4 Admin Overview Dashboard
+
+Focus areas:
+- Team-wide operational visibility
+- Presales to Sales handover quality
+- Bottlenecks in any funnel segment
+
+Logic:
+- Admin uses this for intervention, coaching, and process corrections.
+
+## 5.5 Center Dashboard
+
+Focus areas:
+- Center-level lead movement and outcomes
+- Location-wise conversion/admission patterns
+
+Logic:
+- Used for center-level accountability and local planning.
+
+---
+
+## 6) Inquiry Lifecycle SOP (End-to-End)
+
+## Stage 1: Lead creation
+- Lead enters system through team entry or website form.
+- Basic contact and preference details are captured.
+- Lead becomes visible in relevant queues.
+
+## Stage 2: Initial qualification (Presales)
+- First communication is made.
+- Need, intent, and readiness are captured in notes.
+- Follow-up plan is created.
+
+## Stage 3: Follow-up cycle
+- Each follow-up records interaction outcome.
+- Next follow-up date/time is maintained.
+- Lead warmth/priority can be adjusted based on response.
+
+## Stage 4: Handover to Sales
+- Presales forwards lead when ready.
+- Open context and notes become available to Sales.
+- Ownership moves clearly to sales-side operations.
+
+## Stage 5: Sales progression
+- Sales executes counseling/closure interactions.
+- Stage and sub-stage updates reflect where lead stands.
+- Follow-ups continue until final outcome.
+
+## Stage 6: Outcome update
+- Conversion/admission updates are marked.
+- Final data contributes to dashboard and reports.
+
+---
+
+## 7) Follow-Up Management SOP
+
+Follow-up is the core control mechanism of this CRM.
+
+Rules for all users:
+- Every active lead should have a valid next action.
+- Follow-up completion must include meaningful closure message.
+- Overdue follow-ups should be cleared first in daily planning.
+
+How follow-up logic works:
+- New follow-up = commitment for next interaction.
+- Update follow-up = change in plan/status after real interaction.
+- Close follow-up = confirms completed action and preserves audit trail.
+
+Business reason:
+- Prevents missed leads, supports manager review, and improves closure rate.
+
+---
+
+## 8) Messages and Communication SOP
+
+Inquiry messages/notes are the shared memory of the lead journey.
+
+When to add message:
+- After each call/meeting/chat attempt
+- When new eligibility or concern appears
+- Before handover to next team
+
+Why it matters:
+- Next owner can continue without losing context.
+- Managers can audit quality of counseling.
+- Reduces duplication and confusion.
+
+---
+
+## 9) Calls and Recording SOP
+
+Calls are tracked to improve accountability and communication quality.
+
+How users should work:
+1. Monitor incoming call activity from call views/popups.
+2. Open related lead when relevant.
+3. Add message/follow-up after call.
+4. Review recording when quality check or dispute resolution is needed.
+
+Logic of recording access:
+- Only authorized users can play recordings tied to permitted lead context.
+- Recording review should be used for training, quality, and clarity.
+
+---
+
+## 10) Website Lead SOP
+
+Website forms directly feed CRM operations.
+
+Operational logic:
+- New submission creates a fresh lead when no matching lead context exists.
+- Repeat/relevant submission is attached as additional trail when appropriate.
+
+What team should do:
+- Respond quickly to website-origin leads.
+- Preserve source context in notes for conversion analysis.
+
+---
+
+## 11) User Management SOP (Admin)
+
+Use this area to keep process control healthy.
+
+Key actions:
+- Create user with correct role.
+- Update role/permissions when responsibilities change.
+- Disable users immediately when access should stop.
+
+Business logic:
+- Role determines what data and actions user can access.
+- Correct user governance prevents process and data misuse.
+
+---
+
+## 12) Manage Options SOP (Admin)
+
+Options are business dictionaries used across forms and workflows.
+
+Examples:
+- Courses
+- Locations/Centers
+- Lead statuses
+- Medium/source options
+- Lead stages and sub-stages
+
+How to use:
+1. Update only when process definitions truly change.
+2. Keep names consistent (avoid duplicates with small spelling changes).
+3. Inform teams before major option structure changes.
+
+Business logic:
+- Standardized options keep reporting and dashboard data reliable.
+
+---
+
+## 13) Reports SOP (Admin)
+
+Reports are for management decisions, not only monitoring.
+
+Use reports to:
+- Compare user/team performance
+- Identify follow-up discipline gaps
+- Measure conversion/admission effectiveness
+- Take staffing and coaching decisions
+
+Best practice:
+- Review trends regularly (daily/weekly), not only month-end.
+
+---
+
+## 14) Button and Action Guide (User Language)
+
+Below are the most important action buttons and what they mean operationally.
+
+- `Create Inquiry`
+  - Starts a new lead record for operational tracking.
+
+- `Assign`
+  - Gives lead responsibility to a specific user for action.
+
+- `Claim`
+  - Sales takes ownership of lead for active handling.
+
+- `Forward to Sales`
+  - Moves qualified lead from Presales process to Sales process.
+
+- `Reassign`
+  - Transfers ownership when current owner should not continue.
+
+- `Bulk Reassign`
+  - Admin moves many leads together for load balancing.
+
+- `Add Follow-Up`
+  - Sets the next action commitment for that lead.
+
+- `Update Follow-Up`
+  - Edits follow-up details when plan changes.
+
+- `Close Follow-Up`
+  - Marks follow-up completed and records completion note.
+
+- `Add Message` / `Add Note`
+  - Stores communication outcome and context.
+
+- `Update Status` (including conversion/admission updates)
+  - Reflects latest business stage for reporting and decision-making.
+
+- `View Calls` / `Play Recording`
+  - Opens call history and quality evidence for lead interactions.
+
+- `Export` (where available)
+  - Extracts filtered data for reviews and external analysis.
+
+---
+
+## 15) Role-wise Workflow Matrix (Quick SOP)
+
+## Admin
+- Monitor dashboards -> identify bottlenecks -> adjust users/options -> review reports -> corrective action.
+
+## Presales
+- Pick new lead -> contact -> note -> follow-up -> qualify -> forward to sales.
+
+## Sales
+- Claim/receive lead -> review history -> follow-up -> progress stage -> update conversion/admission.
+
+---
+
+## 16) Daily Operating Checklist
+
+## For Presales
+- Clear all high-priority new leads
+- Ensure every active lead has next follow-up
+- Forward qualified leads with complete notes
+
+## For Sales
+- Start with due follow-ups
+- Update stages after each meaningful interaction
+- Close outcomes promptly (conversion/admission where applicable)
+
+## For Admin
+- Review dashboard exception points
+- Resolve ownership bottlenecks
+- Validate process hygiene (notes/follow-ups/status quality)
+
+---
+
+## 17) Process Quality Rules
+
+- No lead should stay without owner.
+- No active lead should stay without next follow-up plan.
+- Every important interaction should be documented.
+- Handover between teams should always include context.
+- Status updates must reflect actual ground reality, not assumptions.
+
+---
+
+## 18) Escalation SOP
+
+Escalate to Admin when:
+- Lead is blocked due to ownership/permission issue
+- Repeated no-response needs reassignment decision
+- Option values required for process are missing
+- Dashboard/report data appears inconsistent with actual operations
+
+---
+
+## 19) Final Operational Note
+
+This CRM is designed to enforce disciplined lead management.
+If users consistently maintain ownership, follow-up quality, and accurate status updates, the system provides clear visibility, better conversion outcomes, and reliable management control.
+
 # EMS CloudBlitz CRM - Client Functional Documentation
 
 ## 1) Document Purpose
