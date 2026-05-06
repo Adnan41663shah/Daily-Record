@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Calculator, FileSpreadsheet, Edit2, Info, LogOut, Copy, Upload, Shield, BarChart2, X, CheckCircle2 } from 'lucide-react';
+import { Plus, Trash2, Calculator, FileSpreadsheet, Edit2, Info, LogOut, Copy, Upload, Shield, BarChart2, X, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -11,12 +11,41 @@ function cn(...inputs) {
 const generateId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
 
 // Default sheet template
-const createNewSheet = (name) => ({
-  id: generateId(),
-  name: name,
-  price: '',
-  records: [{ id: generateId(), date: '', morning: '', night: '', notes: '' }]
-});
+const createNewSheet = (name) => {
+  let records = [];
+  const parts = name.split(' ');
+  if (parts.length === 2) {
+    const monthName = parts[0];
+    const yearStr = parts[1];
+    const monthIndex = new Date(Date.parse(monthName + " 1, 2012")).getMonth();
+    const year = parseInt(yearStr, 10);
+    
+    if (!isNaN(monthIndex) && !isNaN(year)) {
+      const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+      for (let i = 1; i <= daysInMonth; i++) {
+        const dateStr = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+        records.push({
+          id: generateId(),
+          date: dateStr,
+          morning: '',
+          night: '',
+          notes: ''
+        });
+      }
+    }
+  }
+  
+  if (records.length === 0) {
+    records = [{ id: generateId(), date: '', morning: '', night: '', notes: '' }];
+  }
+
+  return {
+    id: generateId(),
+    name: name,
+    price: '',
+    records
+  };
+};
 
 // Auth Helpers
 const SESSION_DAYS = 15;
@@ -38,11 +67,49 @@ const setSession = (name) => {
 const clearSession = () => localStorage.removeItem('tiffin_session');
 
 // ----------------------------------------------------------------------
+// DATE FORMATTER & COMPONENT
+// ----------------------------------------------------------------------
+const formatDateToDDMMYY = (dateStr) => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  const [year, month, day] = parts;
+  return `${day}/${month}/${year.slice(2)}`;
+};
+
+function CustomDateInput({ value, onChange }) {
+  const [isEditing, setIsEditing] = useState(false);
+  
+  if (isEditing) {
+    return (
+      <input 
+        type="date"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={() => setIsEditing(false)}
+        autoFocus
+        className="w-full bg-transparent border-0 focus:ring-0 p-1 sm:p-1.5 text-xs sm:text-sm text-zinc-800 font-medium rounded-md hover:bg-zinc-100 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-zinc-900/10 transition-all outline-none"
+      />
+    );
+  }
+  
+  return (
+    <div 
+      onClick={() => setIsEditing(true)}
+      className="w-full p-1 sm:p-1.5 text-xs sm:text-sm text-zinc-800 font-medium rounded-md hover:bg-zinc-100 transition-all cursor-pointer min-h-[28px] sm:min-h-[32px] flex items-center"
+    >
+      {value ? formatDateToDDMMYY(value) : 'Select date...'}
+    </div>
+  );
+}
+
+// ----------------------------------------------------------------------
 // LOGIN SCREEN
 // ----------------------------------------------------------------------
 function LoginScreen({ onLogin }) {
   const [name, setName] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isImportMode, setIsImportMode] = useState(false);
   const [importCode, setImportCode] = useState('');
@@ -125,13 +192,23 @@ function LoginScreen({ onLogin }) {
               </div>
               <div className="space-y-1">
                 <label className="block text-xs font-semibold tracking-wide text-zinc-600 uppercase">Password</label>
-                <input 
-                  type="password" 
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3.5 bg-white border border-slate-200/80 rounded-xl focus:ring-4 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none text-zinc-900 font-medium placeholder-zinc-400"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input 
+                    type={showPassword ? "text" : "password"} 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full px-4 py-3.5 bg-white border border-slate-200/80 rounded-xl focus:ring-4 focus:ring-zinc-900/5 focus:border-zinc-900 transition-all outline-none text-zinc-900 font-medium placeholder-zinc-400"
+                    placeholder="••••••••"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)} 
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 p-1 rounded-md transition-colors focus:outline-none"
+                    title={showPassword ? "Hide Password" : "Show Password"}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
               <p className="text-[11px] text-zinc-500 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
                 <strong className="text-zinc-700 font-semibold">Note:</strong> Data is stored locally on this device. To access data elsewhere, use the "Sync" feature inside.
@@ -196,6 +273,7 @@ function Dashboard({ user, onLogout }) {
   const [editSheetName, setEditSheetName] = useState('');
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [showMonthSelect, setShowMonthSelect] = useState(false);
+  const [showNavbarPassword, setShowNavbarPassword] = useState(false);
 
   // Persist data to localStorage whenever sheets change
   useEffect(() => {
@@ -360,9 +438,15 @@ function Dashboard({ user, onLogout }) {
               </button>
               <div className="h-5 w-px bg-slate-200/80 mx-1"></div>
               <div className="flex items-center gap-3">
-                <div className="flex flex-col items-end">
-                  <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold">Account</span>
-                  <span className="text-sm font-semibold text-zinc-900 capitalize leading-none mt-0.5">{user}</span>
+                <div 
+                  className="flex flex-col items-end cursor-pointer select-none group"
+                  onClick={() => setShowNavbarPassword(!showNavbarPassword)}
+                  title="Click to reveal password"
+                >
+                  <span className="text-[10px] uppercase tracking-wider text-zinc-400 font-bold group-hover:text-zinc-600 transition-colors">Account</span>
+                  <span className="text-sm font-semibold text-zinc-900 capitalize leading-none mt-0.5 group-hover:text-zinc-700 transition-colors">
+                    {showNavbarPassword ? JSON.parse(localStorage.getItem(`tiffin_auth_${user}`))?.password : user}
+                  </span>
                 </div>
                 <button onClick={onLogout} className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Logout">
                   <LogOut size={18} />
@@ -456,11 +540,9 @@ function Dashboard({ user, onLogout }) {
                       {index + 1}
                     </td>
                     <td className="py-1 sm:py-2 px-2 sm:px-4 border-r border-slate-100/60">
-                      <input 
-                        type="date" 
+                      <CustomDateInput 
                         value={record.date}
-                        onChange={(e) => updateRecord(record.id, 'date', e.target.value)}
-                        className="w-full bg-transparent border-0 focus:ring-0 p-1 sm:p-1.5 text-xs sm:text-sm text-zinc-800 font-medium rounded-md hover:bg-zinc-100 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-zinc-900/10 transition-all cursor-pointer outline-none"
+                        onChange={(val) => updateRecord(record.id, 'date', val)}
                       />
                     </td>
                     <td className="py-1 sm:py-2 px-2 sm:px-4 text-xs sm:text-sm text-zinc-500 text-center border-r border-slate-100/60 font-medium">
