@@ -406,7 +406,15 @@ function Dashboard() {
       margin: { top: 35 },
     });
     
-    const finalY = doc.lastAutoTable.finalY || 35;
+    let finalY = doc.lastAutoTable.finalY || 35;
+    
+    // Check if there is enough space for the summary at the bottom of the page
+    // The summary block takes approximately 60 units of vertical space
+    const pageHeight = doc.internal.pageSize.getHeight ? doc.internal.pageSize.getHeight() : doc.internal.pageSize.height;
+    if (finalY + 60 > pageHeight) {
+      doc.addPage();
+      finalY = 15; // Reset Y coordinate for the new page
+    }
     
     // Add Summary
     doc.setFontSize(12);
