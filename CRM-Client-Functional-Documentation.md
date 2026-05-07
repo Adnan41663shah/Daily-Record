@@ -1,1049 +1,447 @@
-# EMS CloudBlitz CRM - User SOP Manual
+# EMS CloudBlitz CRM - Functional Operations Manual
 
-## 1) Purpose of This SOP
+## 1) Overview
 
-This document is for operational users and managers.
+This document is the complete business-operational manual for EMS CloudBlitz CRM.
 
-It explains:
-- How each role should use the CRM daily
-- What each screen means
-- What each main button does
-- How every workflow moves from one stage to another
-- Why the system behaves the way it does in each process
+It covers:
+- Platform overview and operating intent
+- End-to-end inquiry workflow (creation to conversion/admission)
+- Presales full workflow, instructions, conditions, and permissions
+- Sales full workflow, instructions, conditions, and permissions
+- Admin full workflow, controls, conditions, and permissions
+- Page-wise mapping of what each role finds and does
 
-This is a business-operations guide, not a technical guide.
+The objective is to run a zero-leakage lead process with auditable actions at every stage.
 
 ---
 
-## 2) Who Uses This CRM
+## 2) Core Operating Principles
 
-There are 3 operational roles:
+1. Every active inquiry must have an owner.
+2. Every active inquiry must have a next action.
+3. Every interaction must be logged in timeline/messages.
+4. Every handover must include business context.
+5. Every closure must include a reason and outcome.
+
+If these principles are followed, dashboards and reports remain accurate for management decisions.
+
+---
+
+## 3) Roles, Responsibilities, and Permission Model
+
+### Roles
 - Admin
 - Presales
 - Sales
 
-Each role sees different pages and actions based on responsibility.
+### Responsibility split
+- Presales: first contact, qualification, nurturing, and forward to Sales.
+- Sales: counseling progression, conversion handling, admission closure.
+- Admin: process governance, user control, options control, reporting, and intervention.
+
+### Permission matrix
+
+| Action | Admin | Presales | Sales |
+|---|---|---|---|
+| Create inquiry | Yes | Yes | Yes (policy based) |
+| Edit inquiry | Yes | Yes (role fields) | Yes (role fields) |
+| Assign/Reassign/Bulk Reassign | Yes | Limited/No | No |
+| Forward to Sales | Yes | Yes | No |
+| Claim inquiry | Yes | No | Yes |
+| Add/Update/Close follow-up | Yes | Yes | Yes |
+| Add messages | Yes | Yes | Yes |
+| Update conversion/admission | Yes | No | Yes |
+| Users management | Yes | No | No |
+| Manage options/master data | Yes | No | No |
+| Reports (full) | Yes | Limited | Limited |
+| Center dashboard | Yes | No | Yes |
+
+Access boundaries:
+- Role determines available pages/actions.
+- Center permissions filter visible data within role.
+- Hidden action/button means action is not permitted.
 
 ---
 
-## 3) Core CRM Logic (Simple View)
+## 4) Page-Wise Access: What Each Role Finds Where
 
-Every inquiry (lead) follows this operating cycle:
+### Public
+- `Login`
+- `Register`
+- `Auth callback`
 
-1. Lead is created (manual entry or website form).
-2. Lead is handled by Presales for first communication and qualification.
-3. Follow-ups are scheduled and tracked until next action is due.
-4. Qualified lead is forwarded to Sales.
-5. Sales drives conversion/admission outcome.
-6. Dashboards and reports update automatically from these actions.
+### Common authenticated
+- `Dashboard`
+- `Inquiry details`
+- `My inquiries`
+- `Profile`
+- `Calls`
+- `Center inquiries` (permission based)
 
-Important logic:
-- One lead should always have clear ownership.
-- Follow-up discipline is mandatory to avoid lead leakage.
-- Status updates are used for team tracking and performance review.
+### Admin pages
+- `Presales inquiries`
+- `Sales inquiries`
+- `Admin follow-ups` and personal inquiry variants
+- `Users`
+- `Manage options`
+- `Reports`
 
----
+### Presales pages
+- `Presales follow-ups queue`
 
-## 4) Role-Wise SOP
+### Sales pages
+- `Sales follow-ups queue`
+- `Sales assigned inquiries`
+- `Sales unified inquiries view`
 
-## 4.1 Admin SOP
-
-### Daily objectives
-- Monitor team activity and performance
-- Ensure clean process handovers between Presales and Sales
-- Manage users and permissions
-- Maintain dropdown/master values used in operations
-- Review reports and intervene where required
-
-### Typical daily sequence
-1. Open Dashboard and review overall pipeline.
-2. Check unattended/new counts and delayed follow-up areas.
-3. Review Presales and Sales performance sections.
-4. Open user screens and verify active team members.
-5. Review options/master values if process updates are required.
-6. Check reports for manager-level decisions.
-
-### Admin workflow decisions
-- If a team member is inactive or leaves, disable user immediately.
-- If lead distribution is uneven, use reassignment options.
-- If process categories change (course/location/stage), update options.
-- If quality issues appear, review inquiry activities and call history.
+### Admin + Sales shared pages
+- `Admitted students`
+- `Conversions`
+- `Center dashboard`
 
 ---
 
-## 4.2 Presales SOP
+## 5) Entire Inquiry Workflow: Creation to Conversion/Admission
 
-### Daily objectives
-- Capture and qualify incoming leads
-- Maintain complete communication notes
-- Keep follow-up queue clean and on-time
-- Forward only qualified leads to Sales with proper context
+## Stage A: Inquiry Creation
 
-### Typical daily sequence
-1. Open Inquiry list and check new/unattended leads.
-2. Open each lead, validate details, and start first contact.
-3. Add message/note after each interaction.
-4. Add follow-up with next date/time and expected outcome.
-5. Continue updates until lead is ready for Sales.
-6. Use “Forward to Sales” when qualification is complete.
+Where:
+- Internal inquiry create form
+- Website form endpoint (public source)
 
-### Presales workflow decisions
-- Do not leave leads without next follow-up date.
-- Update notes on every call or WhatsApp touchpoint.
-- Forward only when enough clarity is available for Sales action.
+Rules:
+- Required fields must be completed.
+- Source and center should be captured or routed by policy.
 
----
+If/Else:
+- If required field missing -> block save and correct data.
+- If probable duplicate found -> log duplicate handling note as per policy.
+- If center unclear -> route to default center and flag for admin review.
 
-## 4.3 Sales SOP
+Output:
+- Inquiry created, ownership path starts, activity trail begins.
 
-### Daily objectives
-- Work assigned or claimed leads
-- Execute stage-wise counseling and closure
-- Mark conversion/admission outcomes correctly
-- Keep follow-up and stage progress current
+## Stage B: Presales Qualification
 
-### Typical daily sequence
-1. Open assigned/sales inquiry views.
-2. Claim or take ownership of available leads.
-3. Review full lead history from Presales notes and activity.
-4. Conduct follow-ups and update stage/sub-stage.
-5. Update conversion/admission status when milestone is reached.
-6. Keep pending leads with clear next actions.
+Where:
+- `Presales inquiries`
+- `Inquiry details`
+- `Presales follow-ups queue`
 
-### Sales workflow decisions
-- Use clear stage progression for pipeline accuracy.
-- Never close a lead without meaningful outcome notes.
-- Keep admission and conversion statuses updated immediately.
+Mandatory actions:
+1. Attempt first contact.
+2. Record message with outcome.
+3. Add follow-up with exact date/time.
+4. Update qualification indicators.
 
----
+If/Else:
+- If lead reachable and interested -> continue qualification.
+- If unreachable -> record attempt, set next follow-up.
+- If invalid lead (wrong number/fake) -> close with valid disposition.
+- If high-potential but aging -> escalate to Admin.
 
-## 5) Dashboard SOP and Meaning
+## Stage C: Follow-Up Discipline
 
-Dashboards are live operational control panels. Numbers are not just statistics; they represent action queues.
+Where:
+- Follow-up queues
+- Inquiry details timeline
 
-## 5.1 Main Dashboard (All logged-in roles)
+If/Else:
+- If follow-up due today -> action same day.
+- If follow-up overdue -> higher priority than non-urgent fresh leads.
+- If plan changes -> update follow-up, do not skip silently.
+- If follow-up completed -> close with meaningful outcome note.
 
-What to use it for:
-- Quick health check of current workload
-- Detect pending follow-up pressure
-- Detect new inquiry spikes
+Global control:
+- No active inquiry can remain without next scheduled action.
 
-How to read it:
-- Higher pending follow-ups = future conversion risk if not addressed
-- High unattended/new count = response delay risk
-- Trend movement helps supervisors decide team load balancing
+## Stage D: Forward to Sales
 
-## 5.2 Presales Dashboard
+Where:
+- `Inquiry details` using `Forward to Sales`
 
-Focus areas:
-- New leads needing first contact
-- Follow-up completion discipline
-- Handover readiness to Sales
+Preconditions:
+- Qualification complete
+- Latest interaction note available
+- Program/intent clear for Sales handover
 
-Logic:
-- Presales performance is measured by contact speed, qualification quality, and clean forwarding.
+If/Else:
+- If qualification incomplete -> do not forward.
+- If forwarded with weak context -> Sales may request correction.
+- If wrong forward happened -> Admin rebalancing/reassignment required.
 
-## 5.3 Sales Dashboard
+## Stage E: Sales Progression
 
-Focus areas:
-- Active sales-stage leads
-- Follow-up completion and stage progression
-- Conversion/admission outcomes
+Where:
+- `Sales assigned inquiries`
+- `Sales unified inquiries view`
+- `Sales follow-ups queue`
+- `Inquiry details`
 
-Logic:
-- Sales performance is measured by progression quality and closure outcomes.
+If/Else:
+- If claimable high-priority lead available -> claim immediately.
+- If lead progresses -> update stage/sub-stage same day.
+- If lead pauses -> keep active with realistic follow-up date.
+- If conversion intent confirmed -> update conversion status.
+- If admission completed -> update admission status and closure.
+- If lead lost -> close with standardized reason and notes.
 
-## 5.4 Admin Overview Dashboard
+## Stage F: Conversion / Admission Closure
 
-Focus areas:
-- Team-wide operational visibility
-- Presales to Sales handover quality
-- Bottlenecks in any funnel segment
+Where:
+- Inquiry status actions
+- `Conversions`
+- `Admitted students`
 
-Logic:
-- Admin uses this for intervention, coaching, and process corrections.
+If/Else:
+- If converted but not admitted -> keep intermediate status policy.
+- If admitted complete -> final close with timestamp and remark.
+- If reversal/cancellation -> audit note and policy correction.
 
-## 5.5 Center Dashboard
-
-Focus areas:
-- Center-level lead movement and outcomes
-- Location-wise conversion/admission patterns
-
-Logic:
-- Used for center-level accountability and local planning.
-
----
-
-## 6) Inquiry Lifecycle SOP (End-to-End)
-
-## Stage 1: Lead creation
-- Lead enters system through team entry or website form.
-- Basic contact and preference details are captured.
-- Lead becomes visible in relevant queues.
-
-## Stage 2: Initial qualification (Presales)
-- First communication is made.
-- Need, intent, and readiness are captured in notes.
-- Follow-up plan is created.
-
-## Stage 3: Follow-up cycle
-- Each follow-up records interaction outcome.
-- Next follow-up date/time is maintained.
-- Lead warmth/priority can be adjusted based on response.
-
-## Stage 4: Handover to Sales
-- Presales forwards lead when ready.
-- Open context and notes become available to Sales.
-- Ownership moves clearly to sales-side operations.
-
-## Stage 5: Sales progression
-- Sales executes counseling/closure interactions.
-- Stage and sub-stage updates reflect where lead stands.
-- Follow-ups continue until final outcome.
-
-## Stage 6: Outcome update
-- Conversion/admission updates are marked.
-- Final data contributes to dashboard and reports.
+Outcome:
+- Dashboards and reports update automatically from final states.
 
 ---
 
-## 7) Follow-Up Management SOP
+## 6) Presales Workflow Manual (Deep)
 
-Follow-up is the core control mechanism of this CRM.
+### Presales mission
+- Fast first-contact SLA
+- Reliable qualification
+- Accurate handover context
+- Follow-up discipline without leakage
 
-Rules for all users:
-- Every active lead should have a valid next action.
-- Follow-up completion must include meaningful closure message.
-- Overdue follow-ups should be cleared first in daily planning.
+### Presales page instructions
 
-How follow-up logic works:
-- New follow-up = commitment for next interaction.
-- Update follow-up = change in plan/status after real interaction.
-- Close follow-up = confirms completed action and preserves audit trail.
+`Dashboard`:
+- Check new, due, overdue counts and decide day priority.
 
-Business reason:
-- Prevents missed leads, supports manager review, and improves closure rate.
+`Presales inquiries`:
+- Pick new leads, validate profile basics, start contact attempts.
 
----
+`Inquiry details`:
+- Maintain messages, update qualification, manage follow-ups, forward when ready.
 
-## 8) Messages and Communication SOP
+`Presales follow-ups queue`:
+- Clear all due and overdue follow-ups by priority.
 
-Inquiry messages/notes are the shared memory of the lead journey.
+`Calls`:
+- Map call outcomes to inquiry notes and next action.
 
-When to add message:
-- After each call/meeting/chat attempt
-- When new eligibility or concern appears
-- Before handover to next team
+`My inquiries`:
+- Track personal ownership and closure readiness.
 
-Why it matters:
-- Next owner can continue without losing context.
-- Managers can audit quality of counseling.
-- Reduces duplication and confusion.
+### Presales if/else operating flow
 
----
+1. Start shift queue check:
+- If overdue follow-ups are high -> clear overdues first.
+- Else process new leads first.
 
-## 9) Calls and Recording SOP
+2. Contact loop:
+- If contact successful -> qualify and plan next step.
+- Else -> log attempt and schedule next follow-up.
 
-Calls are tracked to improve accountability and communication quality.
+3. Qualification decision:
+- If ready for Sales -> forward with full context.
+- Else -> continue nurture cycle.
 
-How users should work:
-1. Monitor incoming call activity from call views/popups.
-2. Open related lead when relevant.
-3. Add message/follow-up after call.
-4. Review recording when quality check or dispute resolution is needed.
+4. End-of-day control:
+- If active lead has no next action -> fix immediately.
+- If repeated no-response high intent -> escalate to Admin.
 
-Logic of recording access:
-- Only authorized users can play recordings tied to permitted lead context.
-- Recording review should be used for training, quality, and clarity.
-
----
-
-## 10) Website Lead SOP
-
-Website forms directly feed CRM operations.
-
-Operational logic:
-- New submission creates a fresh lead when no matching lead context exists.
-- Repeat/relevant submission is attached as additional trail when appropriate.
-
-What team should do:
-- Respond quickly to website-origin leads.
-- Preserve source context in notes for conversion analysis.
+### Presales permissions
+- Can create/edit allowed inquiry fields.
+- Can add messages and manage follow-ups.
+- Can forward to Sales.
+- Cannot manage users/options.
+- Cannot finalize conversion/admission.
 
 ---
 
-## 11) User Management SOP (Admin)
+## 7) Sales Workflow Manual (Deep)
 
-Use this area to keep process control healthy.
+### Sales mission
+- Progress qualified leads to conversion
+- Keep funnel stage data accurate
+- Close admissions with complete records
 
-Key actions:
-- Create user with correct role.
-- Update role/permissions when responsibilities change.
-- Disable users immediately when access should stop.
+### Sales page instructions
 
-Business logic:
-- Role determines what data and actions user can access.
-- Correct user governance prevents process and data misuse.
+`Dashboard`:
+- Review open pipeline, due callbacks, probable closures.
 
----
+`Sales assigned inquiries`:
+- Claim and prioritize actionable leads.
 
-## 12) Manage Options SOP (Admin)
+`Sales unified inquiries view`:
+- Track stage movement and stalled leads.
 
-Options are business dictionaries used across forms and workflows.
+`Inquiry details`:
+- Read Presales history, update stage, run follow-up plan, close outcomes.
 
-Examples:
-- Courses
-- Locations/Centers
-- Lead statuses
-- Medium/source options
-- Lead stages and sub-stages
+`Sales follow-ups queue`:
+- Execute all due callbacks and commitments.
 
-How to use:
-1. Update only when process definitions truly change.
-2. Keep names consistent (avoid duplicates with small spelling changes).
-3. Inform teams before major option structure changes.
+`Conversions`:
+- Review conversion consistency and pending admissions.
 
-Business logic:
-- Standardized options keep reporting and dashboard data reliable.
+`Admitted students`:
+- Validate final admitted cases and coordination context.
 
----
+`Center dashboard`:
+- Monitor center-level closure performance.
 
-## 13) Reports SOP (Admin)
+### Sales if/else operating flow
 
-Reports are for management decisions, not only monitoring.
+1. Queue action:
+- If unclaimed priority leads exist -> claim first.
+- Else clear due follow-ups first.
 
-Use reports to:
-- Compare user/team performance
-- Identify follow-up discipline gaps
-- Measure conversion/admission effectiveness
-- Take staffing and coaching decisions
+2. Stage handling:
+- If conversation advances -> update stage/sub-stage immediately.
+- Else if objection remains -> record reason and next follow-up.
 
-Best practice:
-- Review trends regularly (daily/weekly), not only month-end.
+3. Outcome handling:
+- If converted -> mark conversion.
+- If admitted -> mark admission final.
+- If lost -> close with standard loss reason.
 
----
+4. Exception:
+- If ownership conflict -> raise admin reassignment.
+- If center mapping wrong -> raise admin correction.
 
-## 14) Button and Action Guide (User Language)
-
-Below are the most important action buttons and what they mean operationally.
-
-- `Create Inquiry`
-  - Starts a new lead record for operational tracking.
-
-- `Assign`
-  - Gives lead responsibility to a specific user for action.
-
-- `Claim`
-  - Sales takes ownership of lead for active handling.
-
-- `Forward to Sales`
-  - Moves qualified lead from Presales process to Sales process.
-
-- `Reassign`
-  - Transfers ownership when current owner should not continue.
-
-- `Bulk Reassign`
-  - Admin moves many leads together for load balancing.
-
-- `Add Follow-Up`
-  - Sets the next action commitment for that lead.
-
-- `Update Follow-Up`
-  - Edits follow-up details when plan changes.
-
-- `Close Follow-Up`
-  - Marks follow-up completed and records completion note.
-
-- `Add Message` / `Add Note`
-  - Stores communication outcome and context.
-
-- `Update Status` (including conversion/admission updates)
-  - Reflects latest business stage for reporting and decision-making.
-
-- `View Calls` / `Play Recording`
-  - Opens call history and quality evidence for lead interactions.
-
-- `Export` (where available)
-  - Extracts filtered data for reviews and external analysis.
+### Sales permissions
+- Can claim/manage sales-stage inquiries.
+- Can add messages and follow-ups.
+- Can update conversion/admission.
+- Cannot manage users/options.
+- Cannot perform admin-level balancing.
 
 ---
 
-## 15) Role-wise Workflow Matrix (Quick SOP)
+## 8) Admin Workflow Manual (Deep)
 
-## Admin
-- Monitor dashboards -> identify bottlenecks -> adjust users/options -> review reports -> corrective action.
+### Admin mission
+- Maintain process control and compliance
+- Ensure correct user access and master data quality
+- Detect and fix funnel bottlenecks early
 
-## Presales
-- Pick new lead -> contact -> note -> follow-up -> qualify -> forward to sales.
+### Admin page instructions
 
-## Sales
-- Claim/receive lead -> review history -> follow-up -> progress stage -> update conversion/admission.
+`Dashboard`:
+- Track system pressure: unattended, due, overdue, closures.
+
+`Presales inquiries`:
+- Identify delayed first-stage handling and weak qualification.
+
+`Sales inquiries`:
+- Identify stalled sales funnel and closure delays.
+
+`Admin follow-ups`:
+- Monitor due/overdue discipline across teams.
+
+`Users`:
+- Create users, update role/centers, deactivate exits.
+
+`Manage options`:
+- Maintain clean sources, courses, stages, sub-stages, dispositions, centers.
+
+`Reports`:
+- Analyze productivity and outcome trends by team/user/source/center.
+
+`Center dashboard`:
+- Compare center performance and leakage points.
+
+`Calls`:
+- Run quality checks for dispute and coaching evidence.
+
+### Admin if/else operating flow
+
+1. Daily health scan:
+- If overdue/unattended spike -> immediate balancing and monitoring.
+- Else continue standard governance checks.
+
+2. Workload balancing:
+- If one queue overloaded -> reassign/bulk reassign.
+- If repeated poor follow-up discipline -> coaching + tighter review.
+
+3. User governance:
+- If user leaves -> deactivate same day.
+- If role changes -> update access before next shift.
+- If user reports access issue -> verify role + center + session state.
+
+4. Master-data governance:
+- If new approved category needed -> add standardized option.
+- If duplicate options found -> merge/rationalize as per policy.
+
+5. Data-quality governance:
+- If conversion/admission mismatch found -> audit timeline and correct.
+- If repeated mismatch by team -> enforce corrective SOP.
+
+### Admin permissions
+- Full user lifecycle and role/center access control.
+- Assignment, reassignment, bulk balancing authority.
+- Master options authority.
+- Full report and cross-team visibility.
+- Process intervention and escalation authority.
 
 ---
 
-## 16) Daily Operating Checklist
+## 9) Global Compliance Rules
 
-## For Presales
-- Clear all high-priority new leads
-- Ensure every active lead has next follow-up
-- Forward qualified leads with complete notes
+1. No active inquiry without owner.
+2. No active inquiry without next action.
+3. No handover without context.
+4. No closure without reason.
+5. No operation outside role and center permissions.
 
-## For Sales
-- Start with due follow-ups
-- Update stages after each meaningful interaction
-- Close outcomes promptly (conversion/admission where applicable)
-
-## For Admin
-- Review dashboard exception points
-- Resolve ownership bottlenecks
-- Validate process hygiene (notes/follow-ups/status quality)
+Any violation should be corrected in the same shift.
 
 ---
 
-## 17) Process Quality Rules
+## 10) Daily Checklists
 
-- No lead should stay without owner.
-- No active lead should stay without next follow-up plan.
-- Every important interaction should be documented.
-- Handover between teams should always include context.
-- Status updates must reflect actual ground reality, not assumptions.
+### Presales
+- Clear due/overdue follow-ups.
+- Ensure every active lead has next action.
+- Forward only qualified leads with context.
+- Keep notes meaningful after every interaction.
+
+### Sales
+- Work prioritized assigned/claimed leads.
+- Update stage/sub-stage same day.
+- Keep follow-up queue current.
+- Close outcomes with valid reasons.
+
+### Admin
+- Monitor pressure points and leakage risk.
+- Balance assignments.
+- Validate users, permissions, and options.
+- Review reports and trigger corrective action.
 
 ---
 
-## 18) Escalation SOP
+## 11) Escalation Protocol
 
 Escalate to Admin when:
-- Lead is blocked due to ownership/permission issue
-- Repeated no-response needs reassignment decision
-- Option values required for process are missing
-- Dashboard/report data appears inconsistent with actual operations
+- High-potential leads remain unreachable repeatedly
+- Ownership conflict blocks progress
+- Required option/master value is missing
+- Center permission mismatch blocks operations
+- Dashboard/report trend appears inconsistent with ground reality
+
+Escalation note must include:
+- Inquiry ID
+- Current owner
+- Last action time
+- Issue summary
+- Decision requested
 
 ---
 
-## 19) Final Operational Note
+## 12) Final Instruction
 
-This CRM is designed to enforce disciplined lead management.
-If users consistently maintain ownership, follow-up quality, and accurate status updates, the system provides clear visibility, better conversion outcomes, and reliable management control.
+Use this CRM as a process-control system, not memory-based tracking.
 
-# EMS CloudBlitz CRM - Client Functional Documentation
-
-## 1) Document Purpose
-
-This document explains how the EMS CloudBlitz CRM works end-to-end for client and stakeholder review.
-
-It covers:
-- System architecture and code structure
-- User roles and permissions
-- Every major functional module
-- Step-by-step business workflows
-- API surface grouped by domain
-- Data model and relationships
-- Integrations, real-time behavior, and deployment notes
-
-This documentation is based on the current implementation in this repository.
-
----
-
-## 2) Product Overview
-
-EMS CloudBlitz CRM is a role-based lead and admissions management platform designed for:
-- Capturing and managing inquiries (leads)
-- Assigning and progressing leads across Presales and Sales teams
-- Tracking follow-ups and communication history
-- Monitoring pipeline performance via dashboards and reports
-- Handling call events and recordings through TeleCMI integration
-- Managing options/master data and user accounts
-
-Core departments in workflow:
-- Presales
-- Sales
-- Admin (supervisory and configuration role)
-
----
-
-## 3) High-Level Architecture
-
-The platform is implemented as a monorepo with 4 main layers:
-
-1. Frontend (React SPA)
-- Location: `frontend`
-- Role-based UI, dashboards, inquiry operations, reports, user and option management
-
-2. Backend API (Express + MongoDB)
-- Location: `backend`
-- Authentication, business logic, inquiry lifecycle, dashboards, reports, integrations, internal events
-
-3. Call Service (TeleCMI microservice)
-- Location: `backend/call-service`
-- Handles webhook ingestion (live + CDR), call record mapping, inquiry linking, recording stream
-
-4. Shared Models Package
-- Location: `packages/models`
-- Canonical Mongoose schema definitions shared across backend services
-
-### Runtime Data Flow
-- User browser -> Frontend -> Backend `/api/*`
-- TeleCMI -> Backend webhook proxy `/webhooks/telecmi/*` -> Call Service
-- Call Service -> Backend internal route `/internal/ivr/events` for socket broadcasts
-- Backend Socket.IO -> Frontend real-time notifications and call popups
-
----
-
-## 4) Codebase Structure (Deep Dive)
-
-## 4.1 Root
-- `backend/` - primary API and business logic
-- `backend/call-service/` - TeleCMI and recording service
-- `frontend/` - web application
-- `packages/models/` - shared entity schemas
-- `docs/` - project documentation and migration guides
-
-## 4.2 Backend (`backend/src`)
-
-### `server.ts`
-- Bootstraps Express app
-- Configures security middleware (`helmet`, `mongoSanitize`)
-- Configures CORS and rate limits
-- Registers routes and global error handler
-- Starts HTTP + Socket server
-
-### `routes/`
-- `auth.ts` - login, OAuth, profile
-- `inquiry.ts` - inquiry lifecycle + dashboard/report endpoints
-- `user.ts` - user administration
-- `options.ts` - configurable option values
-- `student.ts` - import and student list
-- `integration.ts` - Microsoft Office365 sync APIs
-- `ivr.ts` - IVR/recording APIs consumed by frontend
-- `websiteForms.ts` - public website form ingestion
-- `internal.ts` - internal service-to-service events
-- `telecmiWebhookProxy.ts` - reverse proxy to call-service webhook endpoints
-- `health.ts` - readiness/live checks
-
-### `controllers/`
-- Auth, users, options, integrations, students
-- Inquiry controller split by responsibility:
-  - `basicOperations.ts`
-  - `assignmentOperations.ts`
-  - `followUpOperations.ts`
-  - `dashboardOperations.ts`
-  - `reportOperations.ts`
-  - `callOperations.ts`
-  - `utilityOperations.ts`
-
-### `services/`
-- `socketService.ts` - user rooms, role rooms, targeted emits
-- `recordingsService.ts` - recording-related business logic
-- Additional supporting services for calls/pages
-
-### `middleware/`
-- JWT/session auth and role authorization
-- Validation error handling
-- Internal API protection
-- Global error handling
-
-### `helpers/`
-- Dashboard aggregation logic
-- Website form processing/upsert rules
-- Inquiry utility helpers
-
-## 4.3 Frontend (`frontend/src`)
-
-### `App.tsx`
-- Global providers (auth, socket, theme, react-query, recording player)
-- Route definitions and role guards
-- Lazy-loaded page modules for performance
-
-### `pages/`
-- Authentication: login/register/auth callback
-- Dashboard and role-specific dashboard tabs
-- Inquiry list/detail variants
-- Calls and recordings UI
-- Reports
-- Users and manage options
-- Conversions/admissions views
-
-### `components/`
-- Layout/navigation
-- Filters and list controls
-- Follow-up modal workflows
-- Recordings player and admin containers
-
-### `services/`
-- API client and endpoint wrappers
-
-### `contexts/`
-- Auth state and session lifecycle
-- Socket subscriptions
-- Theme and recording player state
-
-## 4.4 Call Service (`backend/call-service/src`)
-- Receives and validates TeleCMI webhooks
-- Normalizes provider payloads
-- Upserts call events and call records
-- Links calls to inquiries
-- Sends internal IVR events to backend
-- Exposes internal recording endpoint for backend proxying
-
-## 4.5 Shared Models (`packages/models/src`)
-- `User`
-- `Inquiry`
-- `Activity`
-- `CallRecord`
-- `CallProviderEvent`
-- `Student`
-- `ImportJob`
-- `OptionSettings`
-
----
-
-## 5) Roles, Access Model, and Permission Design
-
-Roles implemented in system:
-- `admin`
-- `presales`
-- `sales`
-
-### 5.1 Admin
-Primary responsibilities:
-- User administration (create, update, activate/deactivate, role assignment)
-- System options/master data management
-- Full reporting and dashboard access
-- Oversight access across presales/sales pipelines
-- Integrations (Office365 sync)
-- Student import management
-
-### 5.2 Presales
-Primary responsibilities:
-- Inquiry creation and early-stage qualification
-- Assigning inquiries to presales users
-- Scheduling/managing follow-ups
-- Forwarding eligible inquiries to sales
-- Tracking own follow-up queue and dashboard metrics
-
-### 5.3 Sales
-Primary responsibilities:
-- Claiming/handling sales-stage inquiries
-- Follow-up execution and stage progression
-- Updating conversion/admission status
-- Center-focused inquiry and dashboard operations (as allowed by center permissions)
-
-### 5.4 Additional Access Dimension: Center Permissions
-`centerPermissions` on user profile restricts/permits center-level data visibility for relevant routes and dashboard slices.
-
-### 5.5 Session and Security Behavior
-- Inactive/disabled users are denied API and socket access
-- Session token validity uses `authVersion` strategy
-- Forced logout can be triggered on user status/auth changes
-
----
-
-## 6) Functional Modules (Feature-by-Feature)
-
-## 6.1 Authentication and Profile
-Capabilities:
-- Login/logout
-- Microsoft OAuth authorization and callback handling
-- One-time code exchange flow for token handoff
-- Authenticated profile retrieval and update
-
-Business impact:
-- Centralized secure entry into CRM
-- Controlled role-based experience from first load
-
-## 6.2 Inquiry Management (Core CRM)
-Capabilities:
-- Create inquiry with role-aware validation
-- List/search/filter inquiries
-- Read inquiry detail with timeline/messages/follow-ups
-- Update inquiry fields
-- Delete inquiry (admin only)
-- Duplicate prevention helper (`check-phone`)
-
-Data captured:
-- Lead identity and contact fields
-- Academic and location preferences
-- Source/medium/course/status mapping via option settings
-
-## 6.3 Assignment and Ownership
-Capabilities:
-- Assign inquiry to user (presales/admin)
-- Claim inquiry (sales/admin)
-- Forward inquiry from presales to sales
-- Reassign sales inquiry
-- Bulk reassign sales inquiries (admin)
-
-Business impact:
-- Controlled lead transfer between departments
-- Ownership clarity at every stage
-
-## 6.4 Follow-Up Lifecycle
-Capabilities:
-- Add follow-up entry (type/date/status/message)
-- Edit or delete follow-up
-- Close follow-up with mandatory completion note
-- My Follow-Ups API and UI queue
-
-Support for sales journey:
-- Lead stage and sub-stage fields with validation against configured lead stages
-
-## 6.5 Communication and Activity
-Capabilities:
-- Append messages on inquiries
-- WhatsApp contact logging
-- Activity stream retrieval per inquiry
-
-Business impact:
-- Full audit trail of interactions and decisions
-
-## 6.6 Dashboard and KPI Analytics
-Capabilities:
-- General dashboard stats
-- Presales-only dashboard
-- Sales-only dashboard
-- Admin overview dashboard
-- Center dashboard (admin/sales)
-
-Typical metrics:
-- New/unattended counts
-- Follow-up status distributions
-- Conversion/admission trend views
-- User/team level workload and outcomes
-
-## 6.7 Reports
-Capabilities:
-- Presales report summary and user drill-down
-- Sales report summary and user drill-down
-- Date-range and user-level performance analysis
-
-Access:
-- Admin only
-
-## 6.8 User Management
-Capabilities:
-- Create/update user profile and role
-- Activate/deactivate users
-- Restrict risky operations (self-delete/critical checks)
-- Trigger TeleCMI agent sync from user module
-
-## 6.9 Option Settings (Master Data)
-Capabilities:
-- Manage globally used options such as:
-  - Courses
-  - Locations
-  - Statuses
-  - Mediums
-  - Lead stages/sub-stages
-
-Business impact:
-- Keeps forms and workflow choices configurable without code changes
-
-## 6.10 Website Form Intake
-Public endpoint family accepts website lead forms:
-- `salary-quiz`
-- `syllabus-download`
-- `be-a-mentor`
-- `contact`
-- `career-counseling`
-- `hire-from-us`
-
-Behavior:
-- Creates or updates inquiry records
-- Adds message trail for repeated submissions
-
-## 6.11 Calls and IVR (TeleCMI)
-Capabilities:
-- Receive live/cdr webhook events
-- Normalize and store provider event + call record
-- Link call to inquiry when possible
-- Create associated activities
-- Emit real-time call popup/status events to UI
-- Provide authorized recording access for frontend
-
-## 6.12 Student Import Module
-Capabilities:
-- Upload/import student data (admin)
-- Background processing with job status tracking
-- Import result retrieval and list APIs
-
----
-
-## 7) End-to-End Workflows (Step by Step)
-
-## 7.1 User Login Workflow
-1. User opens CRM login page.
-2. User authenticates via supported auth flow (including Microsoft OAuth in configured environments).
-3. Backend validates user status and role.
-4. JWT/cookie session is established.
-5. Frontend loads role-specific default pages and navigation.
-
-## 7.2 Presales Lead Handling Workflow
-1. Presales creates inquiry with mandatory validated fields.
-2. Inquiry appears in presales inquiry views.
-3. Presales adds first follow-up note and next action date.
-4. Follow-ups are updated or closed over time with completion notes.
-5. If inquiry qualifies for next stage, presales forwards to sales.
-
-## 7.3 Sales Conversion Workflow
-1. Sales views assigned/claimable inquiries.
-2. Sales claims or receives reassigned inquiry.
-3. Sales executes follow-ups and updates lead stage/sub-stage.
-4. Sales updates conversion/admission status when milestone is reached.
-5. Data contributes to sales dashboards and reports.
-
-## 7.4 Admin Operations Workflow
-1. Admin manages users and their role/center permissions.
-2. Admin updates global options (courses, mediums, statuses, lead stages).
-3. Admin monitors overall dashboards and reports.
-4. Admin handles exception operations (bulk reassign, imports, integration sync).
-
-## 7.5 Website Lead Capture Workflow
-1. Website posts submission to CRM public form API.
-2. Backend validates form type and payload.
-3. Existing lead matching logic runs; system either creates or appends message trail.
-4. Lead becomes available in operational inquiry queues.
-
-## 7.6 Call Event Workflow (TeleCMI)
-1. TeleCMI sends live/cdr webhook to backend.
-2. Backend forwards request to call-service.
-3. Call-service validates, maps, and stores event/call data.
-4. Inquiry association is resolved/created based on call context.
-5. Internal event is sent to backend.
-6. Backend emits socket event to relevant online users for real-time visibility.
-
-## 7.7 Call Recording Playback Workflow
-1. Authorized user opens calls/recordings view.
-2. Frontend requests recording using callRecord ID from backend IVR route.
-3. Backend applies role/inquiry authorization checks.
-4. Backend fetches recording stream from call-service internal API.
-5. Frontend plays recording in integrated player.
-
----
-
-## 8) Frontend Route and Screen Inventory
-
-Public:
-- Login
-- Register
-- Auth callback
-
-Authenticated common:
-- Dashboard
-- Inquiry details
-- My inquiries
-- Profile
-- Calls
-- Center inquiries
-
-Admin-only:
-- Presales inquiries
-- Sales inquiries
-- Admin follow-ups and personal inquiry variants
-- Users
-- Manage options
-- Reports
-
-Presales-only:
-- Presales follow-ups queue
-
-Sales-only:
-- Sales follow-ups queue
-- Sales assigned inquiries
-- Sales unified inquiries view
-
-Admin + Sales:
-- Admitted students
-- Conversions
-- Center dashboard
-
----
-
-## 9) API Domain Map (Operational View)
-
-System:
-- Health/readiness/live checks
-
-Auth:
-- Register, login, logout
-- Microsoft authorize/callback/exchange
-- Profile get/update
-
-Inquiries:
-- CRUD, messages, activities
-- Assignment/claim/forward/reassign/bulk reassign
-- Follow-up create/update/close/delete
-- Conversion/admission status update
-- Counts, dashboard, reports, calls listing
-
-Users:
-- User lifecycle management
-- TeleCMI agent sync trigger
-
-Options:
-- Retrieve/update global options
-
-Students:
-- Import, import job status, list
-
-Integrations:
-- Office365 user fetch/sync endpoints
-
-IVR:
-- Recordings list and fetch
-
-Public website forms:
-- Form type endpoint for multiple website funnels
-
-Webhooks/internal:
-- TeleCMI live and CDR ingress (proxied)
-- Internal IVR event endpoint
-
----
-
-## 10) Data Model and Entity Relationships
-
-## 10.1 User
-- Identity, role, session/auth version, integration fields, center permissions
-- Referenced by inquiry ownership and activity logs
-
-## 10.2 Inquiry
-- Core lead record containing contact/profile fields and lifecycle flags
-- References:
-  - `createdBy -> User`
-  - `assignedTo -> User`
-  - `forwardedBy -> User`
-- Embeds:
-  - `messages[]` with user attribution
-  - `followUps[]` with creator/completer attribution
-
-## 10.3 Activity
-- Timeline/audit record of actions on inquiries
-- Links actor, target user, inquiry, optional call record
-
-## 10.4 CallRecord
-- Call metadata and provider identifiers
-- Links to inquiry and optional attended user
-- Includes recording metadata/path where available
-
-## 10.5 CallProviderEvent
-- Raw/normalized provider webhook event store
-- Supports auditability and dedupe patterns
-
-## 10.6 Student and ImportJob
-- Student dataset for admissions/business operations
-- ImportJob tracks asynchronous import processing state and metrics
-
-## 10.7 OptionSettings
-- Global configurable dictionary values used in validation and UI dropdowns
-
----
-
-## 11) Real-Time and Notification Behavior
-
-Realtime delivery is handled through Socket.IO:
-- Role-based and user-based rooms
-- Inquiry update notifications
-- Dashboard refresh events
-- IVR live call popup/status events
-- Force logout signals on auth/session changes
-
-Business value:
-- Reduces operational delay between events and user action
-- Keeps distributed teams synchronized during call and lead operations
-
----
-
-## 12) Security, Validation, and Reliability Controls
-
-Security controls:
-- Helmet headers
-- Mongo query sanitization
-- CORS allowlist
-- Rate limiting (general + auth-specific)
-- Cookie and JWT-based protected route checks
-- Internal service route protection
-
-Validation controls:
-- Detailed request schema checks via validators
-- Role-aware mandatory field validation in inquiry create/update paths
-- Lead stage and sub-stage consistency checks
-
-Reliability controls:
-- Health and readiness endpoints
-- Error middleware and structured logging
-- Background import job state tracking
-
----
-
-## 13) Deployment and Environment Notes
-
-Deployment components include:
-- Backend container
-- Call-service container
-- MongoDB container
-- Nginx and SSL routing (in production composition)
-
-Environment configuration includes:
-- DB/JWT/CORS/auth settings
-- Integration credentials
-- Internal service shared secrets
-- Call-service connectivity variables
-
-Operational caution for client handover:
-- Ensure all secret values are managed through secure secret stores before production handoff.
-
----
-
-## 14) Business Process Coverage Summary
-
-The implemented CRM currently supports:
-- Lead intake from internal users and public website forms
-- End-to-end inquiry journey from new lead to conversion/admission outcome
-- Department-specific operations for Presales and Sales
-- Performance monitoring through dashboards/reports
-- Real-time call and recording workflows via TeleCMI
-- Administrative control over users and operational metadata
-
-This provides a complete operational CRM loop from acquisition through closure with role-based governance.
-
----
-
-## 15) Suggested Client Review Checklist
-
-For sign-off sessions, review in this order:
-1. Role and access matrix (Admin/Presales/Sales)
-2. Inquiry lifecycle (create -> assign/claim -> follow-up -> forward -> convert/admit)
-3. Dashboard and reports KPI expectations
-4. Call/IVR flow and recording authorization
-5. Website form ingestion and dedupe behavior
-6. User and options administration ownership
-7. Deployment and environment security checklist
-
----
-
-## 16) Appendix - Main Implementation References
-
-Primary backend bootstrap:
-- `backend/src/server.ts`
-
-Primary frontend route map:
-- `frontend/src/App.tsx`
-
-Core inquiry route definitions:
-- `backend/src/routes/inquiry.ts`
-
-Inquiry business logic modules:
-- `backend/src/controllers/inquiryController.ts`
-- `backend/src/controllers/inquiry/basicOperations.ts`
-- `backend/src/controllers/inquiry/assignmentOperations.ts`
-- `backend/src/controllers/inquiry/followUpOperations.ts`
-- `backend/src/controllers/inquiry/dashboardOperations.ts`
-- `backend/src/controllers/inquiry/reportOperations.ts`
-
-TeleCMI and call-service:
-- `backend/src/routes/telecmiWebhookProxy.ts`
-- `backend/call-service/src/controllers/webhookController.ts`
-
-Shared schema contracts:
-- `packages/models/src/index.ts`
-
+When page discipline, role boundaries, and the defined `if/else` logic are followed, inquiry handling remains controlled from form creation through conversion or admission closure.
